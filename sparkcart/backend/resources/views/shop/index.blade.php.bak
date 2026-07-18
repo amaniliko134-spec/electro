@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baraka Solar Shop - Premium Power Marketplace</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: background-color 0.2s, border-color 0.2s; }
+        body { font-family: system-ui, -apple-system, sans-serif; background-color: #f4f6f9; color: #0f172a; line-height: 1.5; }
+        body.dark-mode { background-color: #0f172a; color: #f8fafc; }
+        body.dark-mode nav { background-color: #1e40af; }
+        body.dark-mode .category-block, body.dark-mode .card, body.dark-mode .modal-content, body.dark-mode .cart-drawer { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .product-title, body.dark-mode .modal-title, body.dark-mode h2, body.dark-mode .cart-item-name, body.dark-mode h3 { color: #f8fafc !important; }
+        body.dark-mode .product-desc, body.dark-mode .modal-desc, body.dark-mode .price-lbl { color: #94a3b8 !important; }
+        body.dark-mode .image-frame, body.dark-mode .modal-img-frame { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .setting-menu-panel { background-color: #1e293b !important; border-color: #475569 !important; color: #f8fafc !important; }
+        body.dark-mode .setting-menu-item:hover { background-color: #334155 !important; }
+
+        nav { background-color: #1d4ed8; position: sticky; top: 0; z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .nav-container { max-w: 92rem; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; height: 4.75rem; padding: 0 2rem; gap: 1.5rem; }
+        .nav-logo { color: #ffffff; text-decoration: none; font-size: 1.75rem; font-weight: 900; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap; }
+        .search-form { flex-grow: 1; max-w: 32rem; display: flex; position: relative; }
+        .search-input { width: 100%; padding: 0.65rem 1rem 0.65rem 2.5rem; border-radius: 9999px; border: 2px solid transparent; background-color: #f1f5f9; font-size: 0.9rem; outline: none; }
+        .search-input:focus { background: white; border-color: #fb923c; }
+        .search-icon-label { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: #64748b; }
+        .search-btn { position: absolute; right: 0.25rem; top: 50%; transform: translateY(-50%); background-color: #ff9900; border: none; padding: 0.45rem 1.25rem; border-radius: 9999px; color: white; font-weight: 700; cursor: pointer; }
+        .nav-actions { display: flex; align-items: center; gap: 1rem; position: relative; }
+        .settings-trigger-btn { background: rgba(255,255,255,0.15); color: white; border: none; padding: 0.55rem 1rem; border-radius: 0.5rem; font-weight: 700; font-size: 0.875rem; cursor: pointer; display: flex; align-items: center; gap: 0.35rem; }
+        .setting-menu-panel { position: absolute; top: 3.5rem; right: 7rem; width: 16rem; background: white; border-radius: 0.75rem; border: 1px solid #e2e8f0; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: none; flex-direction: column; padding: 0.5rem 0; z-index: 60; }
+        .setting-menu-panel.open { display: flex; }
+        .setting-menu-item { padding: 0.65rem 1.25rem; text-decoration: none; color: #334155; font-size: 0.875rem; font-weight: 600; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: none; border: none; text-align: left; width: 100%; }
+        .setting-menu-item:hover { background-color: #f1f5f9; color: #1d4ed8; }
+        .basket-trigger-badge { color: #ffffff; background-color: #ff9900; padding: 0.55rem 1.35rem; border-radius: 9999px; font-weight: 800; font-size: 0.9rem; cursor: pointer; border: none; display: flex; align-items: center; gap: 0.5rem; }
+
+        header { background: linear-gradient(135deg, #1e40af, #1e1b4b, #0f172a); color: #ffffff; padding: 4rem 1rem; text-align: center; border-bottom: 4px solid #ff9900; }
+        header h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; }
+        header p { color: #93c5fd; font-size: 1.15rem; max-w: 40rem; margin: 0 auto; }
+        main { max-w: 92rem; margin: 0 auto; padding: 2.5rem 2rem; }
+        .category-block { margin-bottom: 4rem; background: white; padding: 2rem; border-radius: 1.25rem; border: 1px solid #e2e8f0; }
+        .category-heading { font-size: 1.5rem; font-weight: 800; padding-bottom: 0.75rem; margin-bottom: 1.5rem; color: #1e3a8a; border-bottom: 3px solid #1d4ed8; display: flex; align-items: center; justify-content: space-between; }
+        .grid-container { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 1.75rem; }
+        @media (min-width: 640px) { .grid-container { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { .grid-container { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        @media (min-width: 1300px) { .grid-container { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+        .card { background-color: #ffffff; border-radius: 1rem; border: 1px solid #e2e8f0; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; position: relative; cursor: pointer; }
+        .image-frame { height: 14rem; width: 100%; display: flex; align-items: center; justify-content: center; padding: 1.25rem; background: #ffffff; border-bottom: 1px solid #f1f5f9; }
+        .image-frame img { object-fit: contain; height: 100%; width: 100%; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+        .modal-content { background: white; width: 100%; max-width: 44rem; border-radius: 1.5rem; border: 1px solid #cbd5e1; overflow: hidden; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        @media (min-width: 640px) { .modal-content { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        .modal-img-frame { height: 22rem; width: 100%; display: flex; align-items: center; justify-content: center; padding: 2rem; background: #ffffff; border-right: 1px solid #f1f5f9; }
+        .modal-details-pane { padding: 2rem; display: flex; flex-direction: column; justify-content: space-between; }
+        .close-modal-x { position: absolute; top: 1rem; right: 1.25rem; background: none; border: none; font-size: 1.75rem; font-weight: bold; color: #94a3b8; cursor: pointer; z-index: 10; }
+        .close-modal-x:hover { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div id="drawer-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 95; display: none;"></div>
+    <nav>
+        <div class="nav-container">
+            <a href="javascript:void(0)" class="nav-logo">☀️ Baraka Solar Shop</a>
+            <form action="{{ route('shop.index') }}" method="GET" class="search-form">
+                <span class="search-icon-label">🔍</span>
+                <input type="text" name="search" value="{{ $searchQuery ?? '' }}" placeholder="Search inventory rows..." class="search-input">
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+            <div class="nav-actions">
+                <button id="settings-trigger" class="settings-trigger-btn">⚙️ Settings ▾</button>
+                <div id="setting-menu-panel" class="setting-menu-panel">
+                    <button class="setting-menu-item" id="theme-toggle-btn"><span>🌗 System Theme</span> <b id="theme-status-lbl" style="font-size:0.75rem; color:#ff9900;">LIGHT</b></button>
+                    <hr style="border:none; border-top:1px solid #e2e8f0; margin:0.25rem 0;">
+                    @if(session()->has('customer_user'))
+                        <button class="setting-menu-item" onclick="alert('👤 Account Status:\nName: {{ session()->get('customer_user')['name'] }}\nEmail: {{ session()->get('customer_user')['email'] }}')"><span>📋 View Account</span></button>
+                        <button class="setting-menu-item" style="color:#ef4444;" onclick="document.getElementById('logout-form').submit();"><span>🚪 Log Out Profile</span></button>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">@csrf</form>
+                    @else
+                        <button class="setting-menu-item" onclick="openAuthModal('login')"><span>🔑 Sign In / Login</span></button>
+                        <button class="setting-menu-item" onclick="openAuthModal('register')"><span>📝 Register Account</span></button>
+                    @endif
+                </div>
+                <button id="cart-trigger" class="basket-trigger-badge">
+                    <span>🛒</span> Basket (<span id="badge-count-val">{{ $cartCount }}</span>)
+                </button>
+            </div>
+        </div>
+    </nav>
+    <header>
+        <h1>Baraka Commercial Solar Systems</h1>
+        <p>Premium grade photovoltaic configurations and heavy-duty storage devices optimized for East African microgrid distribution lines.</p>
+    </header>
+    <main>
+        @if(empty($products) || count($products) === 0)
+            <div style="text-align: center; padding: 6rem 2rem; background: white; border-radius: 1.5rem; border: 2px dashed #cbd5e1; max-w: 40rem; margin: 2rem auto;">
+                <p style="color: #64748b; font-weight: 600;">No active items found matching your catalog filters.</p>
+                <a href="/" style="display:inline-block; margin-top:1rem; background:#1d4ed8; color:white; padding:0.5rem 1.5rem; border-radius:0.5rem; text-decoration:none; font-weight:700;">Reset Catalog</a>
+            </div>
+        @else
+            @php
+                $displayCategories = [
+                    'solar-batteries' => ['title' => '🔋 Lithium Storage & Deep Cycle Gel Batteries', 'slug' => 'solar-batteries'],
+                    'solar-panels' => ['title' => '☀️ High Efficiency Monocrystalline Solar Panels', 'slug' => 'solar-panels'],
+                    'hybrid-inverters' => ['title' => '⚡ Pure Sine Wave Hybrid Power Inverters', 'slug' => 'hybrid-inverters'],
+                    'charge-controllers' => ['title' => '🔌 Smart MPPT & PWM Solar Charge Controllers', 'slug' => 'charge-controllers'],
+                    'cctv-cameras' => ['title' => '🛡️ 4G PTZ Wireless CCTV Security Cameras', 'slug' => 'cctv-cameras'],
+                    'solar-accessories' => ['title' => '💡 Smart LED Ceiling Lights & Installation Cables', 'slug' => 'solar-accessories']
+                ];
+            @endphp
+            @foreach($displayCategories as $slug => $meta)
+                @php
+                    $catProducts = collect($products)->filter(function($p) use ($slug) { return isset($p->category) && $p->category->slug === $slug; });
+                @endphp
+                @if($catProducts->count() > 0)
+                    <section class="category-block">
+                        <h2 class="category-heading"><span>{{ $meta['title'] }}</span><span style="font-size:0.85rem; background:#f1f5f9; padding:0.25rem 0.75rem; border-radius:9999px;">{{ $catProducts->count() }} SKUs</span></h2>
+                        <div class="grid-container">
+                            @foreach($catProducts as $product)
+                                <div class="card" onclick="triggerProductModal('{{ $product->id }}')">
+                                    <div class="image-frame"><img src="{{ asset($product->image_path) }}" alt="{{ $product->name }}"></div>
+                                    <div style="padding: 1.25rem; flex-grow: 1;">
+                                        <h3 class="product-title" style="font-size: 0.95rem; font-weight: 700; color: #1e293b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6rem;">{{ $product->name }}</h3>
+                                        <p class="product-desc" style="font-size: 0.825rem; color: #64748b; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 1rem;">{{ $product->description }}</p>
+                                    </div>
+                                    <div style="border-top: 1px solid #f1f5f9; padding: 1rem 1.25rem; background: #fafafa; display: flex; justify-content: space-between; align-items: center;" onclick="event.stopPropagation();">
+                                        <div style="display: flex; flex-direction: column;">
+                                            <span class="price-lbl" style="font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; font-weight: 700;">Price</span>
+                                            <span style="font-size: 1.2rem; font-weight: 800; color: #ff6600;">Ksh {{ number_format($product->price, 2) }}</span>
+                                        </div>
+                                        <button data-id="{{ $product->id }}" class="add-to-cart-btn" style="background: #1d4ed8; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; font-size: 0.8rem; border: none; cursor: pointer;">+ Basket</button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+            @endforeach
+        @endif
+    </main>
+    <!-- REAL-TIME PRODUCT SPECIFICATIONS POPUP OVERLAY SCREEN -->
+    <div id="product-detail-modal" class="modal-overlay" onclick="closeProductModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-modal-x" onclick="closeProductModal()">&times;</button>
+            <div style="display: flex; align-items: center; justify-content: center; padding: 2rem; background: #ffffff; border-right: 1px solid #f1f5f9;"><img id="modal-target-img" src="" style="object-fit:contain; max-height:16rem; max-width:100%;"></div>
+            <div class="modal-details-pane">
+                <div>
+                    <h3 id="modal-target-title" class="modal-title" style="font-size:1.3rem; font-weight:800; margin-bottom:0.75rem; color:#0f172a;">Solar Equipment Specs</h3>
+                    <p id="modal-target-desc" class="modal-desc" style="font-size:0.875rem; color:#475569; line-height:1.6; text-align:justify; margin-bottom:1.5rem;">Specifications content stream.</p>
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem; background: #f8fafc; padding: 0.5rem 1rem; border-radius: 8px; width: max-content; border: 1px solid #e2e8f0;">
+                        <span style="font-size: 0.85rem; font-weight: 700; color: #64748b;">Quantity:</span>
+                        <button style="background:#cbd5e1; border:none; width:1.75rem; height:1.75rem; border-radius:4px; font-weight:bold; cursor:pointer;" id="modal-qty-minus">-</button>
+                        <span style="font-weight:800; font-size:1rem;" id="modal-qty-val">1</span>
+                        <button style="background:#cbd5e1; border:none; width:1.75rem; height:1.75rem; border-radius:4px; font-weight:bold; cursor:pointer;" id="modal-qty-plus">+</button>
+                    </div>
+                </div>
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1.25rem;"><span class="price-lbl" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; color:#94a3b8;">Valuation Matrix</span><span id="modal-target-price" style="font-size:1.6rem; font-weight:900; color:#ff6600;">Ksh 0.00</span></div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button id="modal-add-basket-btn" style="flex:1; background:#1d4ed8; color:white; border:none; padding:0.75rem; border-radius:0.75rem; font-weight:700; cursor:pointer;">+ Add to Basket</button>
+                        <button id="modal-instant-buy-btn" style="flex:1.5; background:#25d366; color:white; border:none; padding:0.75rem; border-radius:0.75rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.25rem;">Instant Chat Buy 💬</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOMER PROFILE REGISTRATION SECURITY GATEWAY -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content" style="max-width:26rem; padding:2rem; background:white; display:flex; flex-direction:column;" onclick="event.stopPropagation()">
+            <button class="close-modal-x" onclick="closeAuthModal()">&times;</button>
+            <h3 id="auth-modal-title" class="modal-title" style="font-size:1.4rem; font-weight:900; margin-bottom:1.5rem; text-align:center; color:#1d4ed8;">Register Account</h3>
+            <div id="auth-error-log" style="display:none; background:#fef2f2; color:#b91c1c; padding:0.6rem; border-radius:6px; font-size:0.8rem; font-weight:600; margin-bottom:1rem; text-align:center;"></div>
+            <div id="auth-field-name-row" class="form-group" style="margin-bottom:1rem;"><label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:0.35rem;">Full Legal Name</label><input type="text" id="auth-input-name" class="search-input" style="padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; width:100%;" placeholder="Mathew Kioko"></div>
+            <div class="form-group" style="margin-bottom:1rem;"><label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:0.35rem;">Email Address</label><input type="email" id="auth-input-email" class="search-input" style="padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; width:100%;" placeholder="name@example.com"></div>
+            <div class="form-group" style="margin-bottom:1rem;"><label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:0.35rem;">Choose Password</label><input type="password" id="auth-input-password" class="search-input" style="padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; width:100%;" placeholder="••••••••"></div>
+            <div id="auth-field-confirm-row" class="form-group" style="margin-bottom:1.5rem;"><label style="display:block; font-size:0.75rem; font-weight:700; text-transform:uppercase; margin-bottom:0.35rem; color:#1d4ed8;">Re-enter Password</label><input type="password" id="auth-input-confirm" class="search-input" style="padding:0.6rem; border:1px solid #cbd5e1; border-radius:8px; width:100%;" placeholder="••••••••"></div>
+            <button id="auth-submit-btn" style="width:100%; background:#1d4ed8; color:white; padding:0.75rem; border:none; border-radius:8px; font-weight:800; cursor:pointer; margin-bottom:0.5rem;">Authenticate Console</button>
+            <div style="display: flex; align-items: center; text-align: center; margin: 1rem 0; color: #94a3b8; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">or join instantly</div>
+            <button style="width:100%; background:white; border:1px solid #cbd5e1; padding:0.65rem; border-radius:8px; font-weight:700; color:#475569; display:flex; align-items:center; justify-content:center; gap:0.5rem; cursor:pointer;" onclick="alert('Google Secure Hub connection synced!')">Continue with Google</button>
+        </div>
+    </div>
+
+    <!-- CORPORATE LEGAL POLICIES COMPLIANCE FOOTER LAYOUT -->
+    <footer style="background-color: #ffffff; border-top: 1px solid #e2e8f0; padding: 4rem 0 2rem 0; margin-top: 8rem; font-size: 0.875rem; color: #475569;">
+        <div style="max-w: 92rem; margin: 0 auto; padding: 0 2rem 3rem 2rem; display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 2.5rem; border-bottom: 1px solid #e2e8f0;">
+            <div class="footer-col">
+                <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem;">ABOUT BARAKA SOLAR SHOP</h3>
+                <p style="color: #64748b; line-height: 1.6; font-size: 0.85rem; text-align: justify;">Premier corporate technology distribution hub supplying high-capacity monocrystalline arrays across East Africa.</p>
+            </div>
+            <div class="footer-col">
+                <h3 style="font-size: 1rem; font-weight: 800; color: #0f172a; margin-bottom: 1.25rem;">LEGAL & POLICY CENTER</h3>
+                <ul style="list-style: none; line-height: 2;">
+                    <li><button onclick="alert('Terms applied.')" style="background:none; border:none; font:inherit; color:#64748b; cursor:pointer; font-weight:600;">📋 Terms of Service</button></li>
+                    <li><button onclick="alert('Privacy applied.')" style="background:none; border:none; font:inherit; color:#64748b; cursor:pointer; font-weight:600;">🛡️ Privacy Framework Policy</button></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>CONTACT & SUPPORT</h3>
+                <p style="color: #64748b; font-size: 0.85rem; line-height: 1.8;">Mihango Bypass Center, Nairobi</p>
+                <div style="margin-top: 1rem;"><a href="https://whatsapp.com." target="_blank" style="background-color: #25d366; color: white; text-decoration: none; padding: 0.6rem 1.25rem; border-radius: 0.5rem; font-weight: 800; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.35rem;"><span>💬</span> Chat Natively on WhatsApp: 0727940136</a></div>
+            </div>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const settingsTrigger = document.getElementById('settings-trigger');
+            const settingMenuPanel = document.getElementById('setting-menu-panel');
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const themeStatusLbl = document.getElementById('theme-status-lbl');
+            const cartTrigger = document.getElementById('cart-trigger');
+            const closeDrawer = document.getElementById('close-drawer');
+            const cartDrawer = document.getElementById('cart-drawer');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const badgeCountVal = document.getElementById('badge-count-val');
+            const drawerTotalVal = document.getElementById('drawer-total-val');
+            const checkoutBtn = document.getElementById('drawer-checkout-btn');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            let activeModalProductPrice = 0, activeModalQuantity = 1;
+
+            if(settingsTrigger) settingsTrigger.addEventListener('click', (e) => { e.stopPropagation(); settingMenuPanel.classList.toggle('open'); });
+            document.addEventListener('click', () => settingMenuPanel.classList.remove('open'));
+
+            if(localStorage.getItem('dark-theme') === 'true') { document.body.classList.add('dark-mode'); themeStatusLbl.textContent = 'DARK'; }
+            themeToggleBtn.addEventListener('click', () => {
+                const isDark = document.body.classList.toggle('dark-mode');
+                localStorage.setItem('dark-theme', isDark);
+                themeStatusLbl.textContent = isDark ? 'DARK' : 'LIGHT';
+            });
+
+            cartTrigger.addEventListener('click', () => { cartDrawer.style.right = '0'; drawerOverlay.style.display = 'block'; });
+            closeDrawer.addEventListener('click', () => { cartDrawer.style.right = '-28rem'; drawerOverlay.style.display = 'none'; });
+            drawerOverlay.addEventListener('click', () => { cartDrawer.style.right = '-28rem'; drawerOverlay.style.display = 'none'; window.closeProductModal(); closeAuthModal(); });
+
+            if(checkoutBtn) {
+                checkoutBtn.onclick = function() {
+                    const drawerTotalText = document.getElementById('drawer-total-val').textContent;
+                    const messageString = `Hello Baraka Solar Shop, I am ready to purchase the solar gear in my basket totaling ${drawerTotalText}.`;
+                    window.open(`https://whatsapp.com{encodeURIComponent(messageString)}`, '_blank');
+                };
+            }
+
+            window.triggerProductModal = function(id) {
+                fetch(`/product/details/${id}`).then(res => res.json()).then(data => {
+                    if(data.success) {
+                        activeModalProductPrice = data.product.price; activeModalQuantity = 1;
+                        document.getElementById('modal-qty-val').textContent = "1";
+                        document.getElementById('modal-target-img').src = '/' + data.product.image_path;
+                        document.getElementById('modal-target-title').textContent = data.product.name;
+                        document.getElementById('modal-target-desc').textContent = data.product.description;
+                        document.getElementById('modal-target-price').textContent = 'Ksh ' + Number(activeModalProductPrice).toLocaleString();
+
+                        document.getElementById('modal-add-basket-btn').onclick = function() {
+                            fetch(`/cart/update/${id}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                                body: JSON.stringify({ quantity: activeModalQuantity })
+                            }).then(res => res.json()).then(data => { if(data.success) window.location.reload(); });
+                        };
+                        document.getElementById('modal-instant-buy-btn').onclick = function() {
+                            const singleItemMsg = `Hello Baraka Solar Shop, I want to purchase ${activeModalQuantity} unit(s) of "${data.product.name}" for a total value of Ksh ${(activeModalProductPrice * activeModalQuantity).toLocaleString()}.`;
+                            window.open(`https://whatsapp.com{encodeURIComponent(singleItemMsg)}`, '_blank');
+                        };
+                        document.getElementById('product-detail-modal').style.display = 'flex'; drawerOverlay.style.display = 'block';
+                    }
+                });
+            };
+            window.closeProductModal = function() { document.getElementById('product-detail-modal').style.display = 'none'; if(cartDrawer.style.right !== '0') drawerOverlay.style.display = 'none'; };
+
+            document.getElementById('modal-qty-plus').onclick = function() { activeModalQuantity++; document.getElementById('modal-qty-val').textContent = activeModalQuantity; document.getElementById('modal-target-price').textContent = 'Ksh ' + Number(activeModalProductPrice * activeModalQuantity).toLocaleString(); };
+            document.getElementById('modal-qty-minus').onclick = function() { if(activeModalQuantity > 1) { activeModalQuantity--; document.getElementById('modal-qty-val').textContent = activeModalQuantity; document.getElementById('modal-target-price').textContent = 'Ksh ' + Number(activeModalProductPrice * activeModalQuantity).toLocaleString(); } };
+            window.adjustBasketQty = function(id, directionCode) {
+                const qtyTxtSpan = document.getElementById(`qty-display-${id}`);
+                const linePriceSpan = document.getElementById(`item-line-total-${id}`);
+                let currentItemCountVal = parseInt(qtyTxtSpan.textContent) + directionCode;
+                if (currentItemCountVal <= 0) { killBasketItem(id); return; }
+
+                qtyTxtSpan.textContent = currentItemCountVal;
+                fetch(`/cart/update/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                    body: JSON.stringify({ quantity: currentItemCountVal })
+                }).then(res => res.json()).then(data => {
+                    if(data.success) {
+                        badgeCountVal.textContent = data.cart_count; drawerTotalVal.textContent = 'Ksh ' + data.cart_total;
+                        const targetItemMeta = data.cart_items[id];
+                        if(targetItemMeta) linePriceSpan.textContent = Number(targetItemMeta.price * targetItemMeta.quantity).toLocaleString(undefined, {minimumFractionDigits: 2});
+                    }
+                });
+            };
+
+            window.killBasketItem = function(id) {
+                const targetCardRow = document.getElementById(`drawer-item-${id}`);
+                fetch(`/cart/remove/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken } }).then(res => res.json()).then(data => {
+                    if(data.success) {
+                        badgeCountVal.textContent = data.cart_count; drawerTotalVal.textContent = 'Ksh ' + data.cart_total;
+                        if(targetCardRow) targetCardRow.remove();
+                        if(data.cart_count === 0) window.location.reload();
+                    }
+                });
+            };
+
+            document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation(); const id = this.getAttribute('data-id');
+                    fetch(`/cart/add/${id}`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } }).then(res => res.json()).then(data => { if(data.success) window.location.reload(); });
+                });
+            });
+
+            let currentAuthMode = 'login';
+            window.openAuthModal = function(mode) {
+                currentAuthMode = mode; document.getElementById('auth-modal-title').textContent = mode === 'login' ? 'Customer Profile Login' : 'Register Account';
+                document.getElementById('auth-field-name-row').style.display = mode === 'login' ? 'none' : 'block';
+                document.getElementById('auth-field-confirm-row').style.display = mode === 'login' ? 'none' : 'block';
+                document.getElementById('auth-modal').style.display = 'flex'; drawerOverlay.style.display = 'block';
+            };
+            window.closeAuthModal = function() { document.getElementById('auth-modal').style.display = 'none'; if(cartDrawer.style.right !== '0') drawerOverlay.style.display = 'none'; };
+
+            document.getElementById('auth-submit-btn').onclick = function() {
+                const passField = document.getElementById('auth-input-password').value;
+                const confirmField = document.getElementById('auth-input-confirm').value;
+                const errLog = document.getElementById('auth-error-log');
+                if(currentAuthMode === 'register' && passField !== confirmField) { errLog.textContent = "🔒 Match Error: Passwords do not match."; errLog.style.display = 'block'; return; }
+                const payload = { email: document.getElementById('auth-input-email').value, password: passField, name: document.getElementById('auth-input-name').value };
+                fetch(`/${currentAuthMode}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                    body: JSON.stringify(payload)
+                }).then(res => res.json()).then(data => { if(data.success) { window.location.reload(); } else { errLog.textContent = data.message; errLog.style.display = 'block'; } });
+            };
+        });
+    </script>
+</body>
+</html>

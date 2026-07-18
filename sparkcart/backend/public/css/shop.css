@@ -1,0 +1,145 @@
+:root {
+    color-scheme: dark;
+    --shop-bg: #070309;
+    --shop-bg-alt: #12090f;
+    --shop-text: #f8f4ff;
+    --shop-muted: rgba(255, 255, 255, 0.75);
+    --shop-border: rgba(255, 255, 255, 0.12);
+    --shop-accent: #ff2b3b;
+    --shop-accent-soft: rgba(255, 43, 59, 0.15);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: radial-gradient(circle at top right, rgba(255, 43, 59, 0.11), transparent 22%),
+        linear-gradient(180deg, var(--shop-bg) 0%, var(--shop-bg-alt) 100%);
+    color: var(--shop-text);
+    min-height: 100vh;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+button,
+a {
+    font: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button {
+    border: none;
+    outline: none;
+}
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-add,
+.btn-pay,
+.btn-buy,
+.category-panel-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    transition: transform 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+
+.btn:hover,
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-add:hover,
+.btn-pay:hover,
+.btn-buy:hover,
+.category-panel-link:hover {
+    transform: translateY(-1px);
+}
+
+.btn {
+    background: linear-gradient(135deg, var(--shop-accent), #ff7a72);
+    color: #fff;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nav-links a,
+.category-tab {
+    border-radius: 999px;
+    padding: 0.45rem 0.8rem;
+    color: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.nav-links a:hover,
+.category-tab:hover,
+.nav-links a.active,
+.category-tab.active {
+    background: rgba(255, 43, 59, 0.18);
+    color: #ffffff;
+    border-color: rgba(255, 43, 59, 0.24);
+}
+
+.category-panel-link {
+    display: grid;
+    grid-template-rows: repeat(3, auto);
+    gap: 0.45rem;
+    padding: 1.1rem 1rem;
+    border-radius: 1.35rem;
+    border: 1px solid rgba(255, 43, 59, 0.12);
+    background: rgba(255, 43, 59, 0.05);
+    color: #f3edff;
+    cursor: pointer;
+}
+
+.page-loader {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.60);
+    z-index: 999;
+}
+
+.page-loader.active {
+    display: flex;
+}
+
+.page-loader-ring {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.12);
+    border-top-color: var(--shop-accent);
+    animation: page-loader-rotate 1.1s linear infinite;
+    box-shadow: 0 0 0 4px rgba(255, 43, 59, 0.08);
+}
+
+.page-loader-label {
+    margin-top: 1rem;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    opacity: 0.92;
+}
+
+@keyframes page-loader-rotate {
+    to { transform: rotate(360deg); }
+}
